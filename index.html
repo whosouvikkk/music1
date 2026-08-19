@@ -2,75 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Music Page 🎧</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ट्रक वाला - The Highway</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for English and Hindi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+Devanagari:wght@600;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for elegant minimal icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
+    <!-- Background Layers -->
+    <div class="bg-base"></div>
+    <div class="bg-gradient"></div>
+    <div class="bg-grain"></div>
 
-    <div id="app-container">
+    <!-- Hidden YouTube Player -->
+    <div id="yt-player-container">
+        <div id="yt-player"></div>
+    </div>
+
+    <!-- Main Application UI -->
+    <div class="app-container">
         
-        <!-- LANDING PAGE -->
-        <div id="landing-view" class="view active">
-            <div class="landing-content">
-                <div class="landing-icon">🎧</div>
-                <h1>welcome to my music page</h1>
-                <p>some songs I like</p>
-                <button id="start-btn" class="glow-button">listen with me →</button>
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="time-display" id="ind-time">--:-- --</div>
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span>music on the highway</span>
             </div>
-        </div>
+            <a href="https://youtube.com/playlist?list=PLQMOvIibwSoQ&si=jXQvsK4Dy1bY4weI" target="_blank" class="glass-btn icon-btn" aria-label="Open Playlist">
+                <i class="ph ph-playlist"></i>
+            </a>
+        </header>
 
-        <!-- CHAT / MUSIC PAGE -->
-        <div id="chat-view" class="view hidden">
+        <!-- Center Visual & Text -->
+        <main class="hero-section">
+            <h1 class="hindi-title">ट्रक वाला</h1>
+            <div class="cinematic-visual">
+                <!-- Using a high-quality atmospheric truck/highway placeholder image -->
+                <img src="https://images.unsplash.com/photo-1601058268499-e52658b8ebb4?q=80&w=2070&auto=format&fit=crop" alt="Cinematic Truck Visual">
+                <div class="visual-overlay"></div>
+            </div>
+            <h2 class="hindi-tagline">दम है तो क्रॉस कर, नहीं तो बर्दाश्त कर।</h2>
+        </main>
+
+        <!-- Glassmorphism Music Player -->
+        <footer class="music-player glass-panel">
             
-            <header class="chat-header">
-                <span class="back-arrow" id="back-btn">←</span>
-                <h2>🎧 my little playlist</h2>
-            </header>
-
-            <div class="chat-scroll-area">
-                
-                <div class="chat-message me">
-                    <div class="bubble">hey 👋</div>
+            <div class="player-info">
+                <div class="artwork-container">
+                    <img id="track-art" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Album Art">
+                    <div class="artwork-glow" id="track-art-glow"></div>
                 </div>
-                
-                <div class="chat-message me">
-                    <div class="bubble">pick a song below to start playing ↓</div>
+                <div class="track-details">
+                    <h3 id="track-title" class="truncate">Loading the highway...</h3>
+                    <p id="track-artist" class="truncate">Please wait</p>
                 </div>
-
-                <!-- CUSTOM SONG LIST (Replaces the video player) -->
-                <div id="song-list" class="song-list-container">
-                    <!-- Songs will be injected here by JavaScript -->
-                </div>
-
-                <!-- Custom Controls (Now pinned to the bottom of the list) -->
-                <div class="custom-controls">
-                    <button id="prev-btn" class="control-btn">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                    </button>
-                    
-                    <button id="play-pause-btn" class="control-btn play-btn">
-                        <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    </button>
-                    
-                    <button id="next-btn" class="control-btn">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                    </button>
-                </div>
-
-                <div class="chat-spacer"></div>
             </div>
 
-        </div>
+            <div class="player-controls">
+                
+                <div class="progress-container">
+                    <span id="time-current">0:00</span>
+                    <div class="progress-bar-wrapper" id="progress-wrapper">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                    <span id="time-total">0:00</span>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="glass-btn small-btn" id="btn-shuffle" aria-label="Toggle Shuffle">
+                        <i class="ph-fill ph-shuffle"></i>
+                    </button>
+                    
+                    <button class="glass-btn" id="btn-prev" aria-label="Previous Song">
+                        <i class="ph-fill ph-skip-back"></i>
+                    </button>
+                    
+                    <button class="glass-btn play-btn" id="btn-play-pause" aria-label="Play or Pause">
+                        <i class="ph-fill ph-play" id="icon-play-pause"></i>
+                    </button>
+                    
+                    <button class="glass-btn" id="btn-next" aria-label="Next Song">
+                        <i class="ph-fill ph-skip-forward"></i>
+                    </button>
+                    
+                    <!-- Mobile only fallback playlist link if needed, hidden on desktop -->
+                    <a href="https://youtube.com/playlist?list=PLQMOvIibwSoQ&si=jXQvsK4Dy1bY4weI" target="_blank" class="glass-btn small-btn mobile-playlist" aria-label="Open Playlist">
+                        <i class="ph ph-list"></i>
+                    </a>
+                </div>
+
+            </div>
+        </footer>
     </div>
 
-    <!-- HIDDEN YOUTUBE PLAYER -->
-    <!-- We keep it 1x1 pixel so mobile browsers don't block it -->
-    <div id="hidden-player-wrapper">
-        <div id="youtube-player"></div>
-    </div>
-
+    <!-- Application Logic -->
     <script src="script.js"></script>
 </body>
 </html>
