@@ -1,169 +1,201 @@
-// ==========================================
-// CONFIGURATION
-// ==========================================
-const PLAYLIST_ID = "PLHfO6lzPQFTm2FvDcmGtZPVeVAHCMqI8Y";
+/**
+ * Configuration Constant
+ * The requested YouTube playlist ID
+ */
+const PLAYLIST_ID = "PLQMOvIibwSoQ";
 
-// Because we are NOT using the YouTube API, we cannot fetch the names automatically.
-// We must write the song names manually. 
-// The order of these songs MUST match the order in your YouTube playlist!
-const MY_SONGS = [
-    { title: "First Song Name", artist: "Artist Name" },
-    { title: "Second Song Name", artist: "Artist Name" },
-    { title: "Third Song Name", artist: "Artist Name" },
-    { title: "Fourth Song Name", artist: "Artist Name" }
-    // Add as many as you have in your playlist...
-];
+// UI Elements
+const ui = {
+    time: document.getElementById('ind-time'),
+    trackTitle: document.getElementById('track-title'),
+    trackArtist: document.getElementById('track-artist'),
+    trackArt: document.getElementById('track-art'),
+    trackArtGlow: document.getElementById('track-art-glow'),
+    timeCurrent: document.getElementById('time-current'),
+    timeTotal: document.getElementById('time-total'),
+    progressWrapper: document.getElementById('progress-wrapper'),
+    progressFill: document.getElementById('progress-fill'),
+    btnPlayPause: document.getElementById('btn-play-pause'),
+    iconPlayPause: document.getElementById('icon-play-pause'),
+    btnNext: document.getElementById('btn-next'),
+    btnPrev: document.getElementById('btn-prev'),
+    btnShuffle: document.getElementById('btn-shuffle'),
+    playerFooter: document.querySelector('.music-player')
+};
 
-// ==========================================
-// DOM ELEMENTS
-// ==========================================
-const landingView = document.getElementById('landing-view');
-const chatView = document.getElementById('chat-view');
-const startBtn = document.getElementById('start-btn');
-const backBtn = document.getElementById('back-btn');
-const songListContainer = document.getElementById('song-list');
+let player;
+let progressInterval;
+let isShuffled = true;
 
-let currentSongIndex = -1;
-
-startBtn.addEventListener('click', () => {
-    landingView.classList.remove('active');
-    landingView.classList.add('hidden');
-    chatView.classList.remove('hidden');
-    chatView.classList.add('active');
-    
-    loadYouTubeAPI();
-});
-
-backBtn.addEventListener('click', () => {
-    chatView.classList.remove('active');
-    chatView.classList.add('hidden');
-    landingView.classList.remove('hidden');
-    landingView.classList.add('active');
-});
-
-// ==========================================
-// RENDER CUSTOM SONG LIST
-// ==========================================
-function renderSongList() {
-    songListContainer.innerHTML = ''; // Clear it
-
-    MY_SONGS.forEach((song, index) => {
-        const card = document.createElement('div');
-        card.className = 'song-card';
-        card.id = `song-card-${index}`;
-        
-        card.innerHTML = `
-            <div class="song-icon">🎵</div>
-            <div class="song-info">
-                <div class="song-title">${song.title}</div>
-                <div class="song-artist">${song.artist}</div>
-            </div>
-        `;
-
-        card.addEventListener('click', () => {
-            playSongAtIndex(index);
-        });
-
-        songListContainer.appendChild(card);
-    });
+// 1. Time Logic (Indian Standard Time)
+function updateIndianTime() {
+    const options = { 
+        timeZone: 'Asia/Kolkata', 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+    };
+    ui.time.innerText = new Date().toLocaleTimeString('en-IN', options).toLowerCase();
 }
+setInterval(updateIndianTime, 1000);
+updateIndianTime();
 
-function updateActiveSongUI(index) {
-    // Remove playing class from all
-    document.querySelectorAll('.song-card').forEach(card => card.classList.remove('playing'));
-    
-    // Add playing class to current
-    const activeCard = document.getElementById(`song-card-${index}`);
-    if (activeCard) {
-        activeCard.classList.add('playing');
-    }
-}
-
-// ==========================================
-// YOUTUBE PLAYER (HIDDEN)
-// ==========================================
-let ytPlayer;
-let apiLoaded = false;
-
+// 2. YouTube IFrame API Initialization
 function loadYouTubeAPI() {
-    renderSongList(); // Draw the UI cards
-
-    if (apiLoaded) return;
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    apiLoaded = true;
 }
 
+// Called automatically by YouTube API script when ready
 window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('youtube-player', {
-        height: '1',
-        width: '1',
+    player = new YT.Player('yt-player', {
+        height: '10',
+        width: '10',
         playerVars: {
             listType: 'playlist',
             list: PLAYLIST_ID,
-            playsinline: 1, 
+            playsinline: 1,
             controls: 0,
-            rel: 0
+            disablekb: 1,
+            fs: 0,
+            rel: 0,
+            iv_load_policy: 3
         },
         events: {
             'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
         }
     });
-}
+};
 
-// ==========================================
-// CUSTOM CONTROLS LOGIC
-// ==========================================
-const playPauseBtn = document.getElementById('play-pause-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const iconPlay = document.getElementById('icon-play');
-const iconPause = document.getElementById('icon-pause');
-
+// 3. Player Event Handlers
 function onPlayerReady(event) {
-    playPauseBtn.addEventListener('click', () => {
-        const state = ytPlayer.getPlayerState();
-        if (state === 1) { // Playing
-            ytPlayer.pauseVideo();
-        } else {
-            // If they click play and nothing is selected, start at 0
-            if (currentSongIndex === -1) playSongAtIndex(0);
-            else ytPlayer.playVideo();
-        }
-    });
-
-    prevBtn.addEventListener('click', () => {
-        if (currentSongIndex > 0) playSongAtIndex(currentSongIndex - 1);
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (currentSongIndex < MY_SONGS.length - 1) playSongAtIndex(currentSongIndex + 1);
-    });
-}
-
-function playSongAtIndex(index) {
-    currentSongIndex = index;
-    updateActiveSongUI(index);
-    ytPlayer.playVideoAt(index);
+    // Enable shuffle by default
+    player.setShuffle(isShuffled);
+    ui.btnShuffle.classList.toggle('active', isShuffled);
+    
+    // Attempt Autoplay
+    // Browsers often block autoplay without user interaction.
+    player.playVideo();
+    
+    // Bind UI Buttons
+    ui.btnPlayPause.addEventListener('click', togglePlay);
+    ui.btnNext.addEventListener('click', () => player.nextVideo());
+    ui.btnPrev.addEventListener('click', () => player.previousVideo());
+    ui.btnShuffle.addEventListener('click', toggleShuffle);
+    
+    // Bind Progress Bar seeking
+    ui.progressWrapper.addEventListener('click', handleSeek);
 }
 
 function onPlayerStateChange(event) {
-    // 1 = playing, 2 = paused
-    if (event.data === 1) {
-        iconPlay.classList.add('hidden');
-        iconPause.classList.remove('hidden');
-        
-        // Sync UI with YouTube's current playlist index (in case it auto-plays next)
-        const ytIndex = ytPlayer.getPlaylistIndex();
-        if (ytIndex !== currentSongIndex && ytIndex !== -1) {
-            currentSongIndex = ytIndex;
-            updateActiveSongUI(currentSongIndex);
-        }
-    } else {
-        iconPause.classList.add('hidden');
-        iconPlay.classList.remove('hidden');
+    switch(event.data) {
+        case YT.PlayerState.PLAYING:
+            ui.iconPlayPause.classList.replace('ph-play', 'ph-pause');
+            ui.playerFooter.classList.add('is-playing');
+            updateMetadata();
+            startProgressBar();
+            break;
+        case YT.PlayerState.PAUSED:
+            ui.iconPlayPause.classList.replace('ph-pause', 'ph-play');
+            ui.playerFooter.classList.remove('is-playing');
+            stopProgressBar();
+            break;
+        case YT.PlayerState.ENDED:
+            // Auto advance happens natively with playlists, but we reset UI
+            stopProgressBar();
+            ui.progressFill.style.width = '0%';
+            break;
+        case YT.PlayerState.BUFFERING:
+            // Optional buffering state could be added here
+            break;
     }
 }
+
+function onPlayerError(event) {
+    ui.trackTitle.innerText = "The highway is quiet right now.";
+    ui.trackArtist.innerText = "Track unavailable or blocked.";
+}
+
+// 4. UI Updates
+function updateMetadata() {
+    const data = player.getVideoData();
+    if (data && data.video_id) {
+        // Truncate logic is handled by CSS .truncate
+        ui.trackTitle.innerText = data.title || "Unknown Title";
+        ui.trackArtist.innerText = data.author || "Unknown Artist";
+        
+        // Fetch highest quality thumbnail available
+        const thumbnailUrl = `https://i.ytimg.com/vi/${data.video_id}/mqdefault.jpg`;
+        ui.trackArt.src = thumbnailUrl;
+        ui.trackArtGlow.style.backgroundImage = `url(${thumbnailUrl})`;
+    }
+    
+    const duration = player.getDuration();
+    ui.timeTotal.innerText = formatTime(duration);
+}
+
+function togglePlay() {
+    if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+    } else {
+        player.playVideo();
+    }
+}
+
+function toggleShuffle() {
+    isShuffled = !isShuffled;
+    player.setShuffle(isShuffled);
+    ui.btnShuffle.classList.toggle('active', isShuffled);
+}
+
+function handleSeek(e) {
+    if (!player || player.getPlayerState() !== YT.PlayerState.PLAYING) return;
+    
+    const rect = ui.progressWrapper.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percent = clickX / rect.width;
+    const seekTime = percent * player.getDuration();
+    
+    player.seekTo(seekTime, true);
+    updateProgressBarUI();
+}
+
+// 5. Progress Bar Engine
+function startProgressBar() {
+    stopProgressBar();
+    progressInterval = setInterval(updateProgressBarUI, 500);
+}
+
+function stopProgressBar() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+    }
+}
+
+function updateProgressBarUI() {
+    if (player && player.getCurrentTime) {
+        const current = player.getCurrentTime();
+        const duration = player.getDuration();
+        
+        if (duration > 0) {
+            const percent = (current / duration) * 100;
+            ui.progressFill.style.width = `${percent}%`;
+            ui.timeCurrent.innerText = formatTime(current);
+        }
+    }
+}
+
+// Formatting Helper
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// Init
+loadYouTubeAPI();
