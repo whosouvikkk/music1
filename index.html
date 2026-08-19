@@ -10,9 +10,7 @@
 
     <div id="app-container">
         
-        <!-- ============================== -->
-        <!-- LANDING PAGE                   -->
-        <!-- ============================== -->
+        <!-- LANDING PAGE -->
         <div id="landing-view" class="view active">
             <div class="landing-content">
                 <div class="landing-icon">🎧</div>
@@ -22,9 +20,7 @@
             </div>
         </div>
 
-        <!-- ============================== -->
-        <!-- CHAT / MUSIC PAGE              -->
-        <!-- ============================== -->
+        <!-- CHAT / MUSIC PAGE -->
         <div id="chat-view" class="view hidden">
             
             <header class="chat-header">
@@ -34,54 +30,33 @@
 
             <div class="chat-scroll-area">
                 
-                <!-- Chat Messages -->
                 <div class="chat-message me">
                     <div class="bubble">hey 👋</div>
                 </div>
                 
                 <div class="chat-message me">
-                    <div class="bubble">you might like these 🎧</div>
+                    <div class="bubble">pick a song below to start playing ↓</div>
                 </div>
 
-                <div class="chat-message me">
-                    <div class="bubble">this playlist has been on repeat lately</div>
+                <!-- CUSTOM SONG LIST (Replaces the video player) -->
+                <div id="song-list" class="song-list-container">
+                    <!-- Songs will be injected here by JavaScript -->
                 </div>
 
-                <div class="chat-message me">
-                    <div class="bubble">pick a song ↓</div>
-                </div>
-
-                <!-- YouTube Player Container -->
-                <div class="player-card">
-                    <div class="video-wrapper">
-                        <!-- The YouTube IFrame will be injected here -->
-                        <div id="youtube-player"></div>
-                        <div id="player-error" class="hidden">
-                            The playlist couldn't be loaded. Please check your connection or try again.
-                        </div>
-                    </div>
+                <!-- Custom Controls (Now pinned to the bottom of the list) -->
+                <div class="custom-controls">
+                    <button id="prev-btn" class="control-btn">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
                     
-                    <!-- Custom Controls -->
-                    <div class="custom-controls">
-                        <button id="prev-btn" class="control-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                        </button>
-                        
-                        <button id="play-pause-btn" class="control-btn play-btn">
-                            <!-- Play Icon (Default) -->
-                            <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                            <!-- Pause Icon (Hidden initially) -->
-                            <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        </button>
-                        
-                        <button id="next-btn" class="control-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="chat-message them">
-                    <div class="bubble">listening right now 👀</div>
+                    <button id="play-pause-btn" class="control-btn play-btn">
+                        <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    
+                    <button id="next-btn" class="control-btn">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
                 </div>
 
                 <div class="chat-spacer"></div>
@@ -90,7 +65,12 @@
         </div>
     </div>
 
-    <!-- Load main script -->
+    <!-- HIDDEN YOUTUBE PLAYER -->
+    <!-- We keep it 1x1 pixel so mobile browsers don't block it -->
+    <div id="hidden-player-wrapper">
+        <div id="youtube-player"></div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
