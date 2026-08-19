@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Music Page 🎧</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- ============================== -->
+        <!-- LANDING PAGE                   -->
+        <!-- ============================== -->
+        <div id="landing-view" class="view active">
+            <div class="landing-content">
+                <div class="landing-icon">🎧</div>
+                <h1>welcome to my music page</h1>
+                <p>some songs I like</p>
+                <button id="start-btn" class="glow-button">listen with me →</button>
+            </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- CHAT / MUSIC PAGE              -->
+        <!-- ============================== -->
+        <div id="chat-view" class="view hidden">
+            
+            <header class="chat-header">
+                <span class="back-arrow" id="back-btn">←</span>
+                <h2>🎧 my little playlist</h2>
+            </header>
+
+            <div class="chat-scroll-area">
+                
+                <!-- Chat Messages -->
+                <div class="chat-message me">
+                    <div class="bubble">hey 👋</div>
+                </div>
+                
+                <div class="chat-message me">
+                    <div class="bubble">you might like these 🎧</div>
+                </div>
+
+                <div class="chat-message me">
+                    <div class="bubble">this playlist has been on repeat lately</div>
+                </div>
+
+                <div class="chat-message me">
+                    <div class="bubble">pick a song ↓</div>
+                </div>
+
+                <!-- YouTube Player Container -->
+                <div class="player-card">
+                    <div class="video-wrapper">
+                        <!-- The YouTube IFrame will be injected here -->
+                        <div id="youtube-player"></div>
+                        <div id="player-error" class="hidden">
+                            The playlist couldn't be loaded. Please check your connection or try again.
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Controls -->
+                    <div class="custom-controls">
+                        <button id="prev-btn" class="control-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        
+                        <button id="play-pause-btn" class="control-btn play-btn">
+                            <!-- Play Icon (Default) -->
+                            <svg id="icon-play" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            <!-- Pause Icon (Hidden initially) -->
+                            <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        
+                        <button id="next-btn" class="control-btn">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-message them">
+                    <div class="bubble">listening right now 👀</div>
+                </div>
+
+                <div class="chat-spacer"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Load main script -->
+    <script src="script.js"></script>
+</body>
+</html>
