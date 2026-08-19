@@ -77,14 +77,15 @@ function onPlayerReady(event) {
     player.setShuffle(isShuffled);
     ui.btnShuffle.classList.toggle('active', isShuffled);
     
-    // Attempt Autoplay
-    // Browsers often block autoplay without user interaction.
-    player.playVideo();
+    // Start with a different/random playlist item on each page load.
+    // Shuffle remains enabled, while explicitly choosing a random starting
+    // position prevents the site from always opening on the same song.
+    startRandomTrack();
     
     // Bind UI Buttons
     ui.btnPlayPause.addEventListener('click', togglePlay);
-    ui.btnNext.addEventListener('click', () => player.nextVideo());
-    ui.btnPrev.addEventListener('click', () => player.previousVideo());
+    ui.btnNext.addEventListener('click', playNextWithWrap);
+    ui.btnPrev.addEventListener('click', playPreviousWithWrap);
     ui.btnShuffle.addEventListener('click', toggleShuffle);
     
     // Bind Progress Bar seeking
@@ -105,9 +106,15 @@ function onPlayerStateChange(event) {
             stopProgressBar();
             break;
         case YT.PlayerState.ENDED:
-            // Auto advance happens natively with playlists, but we reset UI
+            // Never leave the player stopped at the playlist boundary.
+            // If the current track was the final item, start again from
+            // the beginning. Otherwise let YouTube continue normally.
             stopProgressBar();
             ui.progressFill.style.width = '0%';
+
+            if (isAtPlaylistEnd()) {
+                playPlaylistIndex(0);
+            }
             break;
         case YT.PlayerState.BUFFERING:
             // Optional buffering state could be added here
@@ -136,6 +143,73 @@ function updateMetadata() {
     
     const duration = player.getDuration();
     ui.timeTotal.innerText = formatTime(duration);
+}
+
+function startRandomTrack() {
+    // YouTube can need a moment to populate the playlist after onReady.
+    // Keep the existing player/API logic intact and only choose the
+    // starting position randomly.
+    const chooseRandomTrack = () => {
+        if (!player || typeof player.getPlaylist !== 'function') return;
+
+        const playlist = player.getPlaylist();
+        if (playlist && playlist.length > 0) {
+            const randomIndex = Math.floor(Math.random() * playlist.length);
+            playPlaylistIndex(randomIndex);
+        } else {
+            // Fallback to the normal player behavior if the playlist
+            // has not populated yet.
+            player.playVideo();
+        }
+    };
+
+    setTimeout(chooseRandomTrack, 250);
+}
+
+function playPlaylistIndex(index) {
+    if (!player || typeof player.playVideoAt !== 'function') return;
+    player.playVideoAt(index);
+}
+
+function getPlaylistLength() {
+    if (!player || typeof player.getPlaylist !== 'function') return 0;
+    const playlist = player.getPlaylist();
+    return Array.isArray(playlist) ? playlist.length : 0;
+}
+
+function getCurrentPlaylistIndex() {
+    if (!player || typeof player.getPlaylistIndex !== 'function') return -1;
+    return player.getPlaylistIndex();
+}
+
+function isAtPlaylistEnd() {
+    const length = getPlaylistLength();
+    const index = getCurrentPlaylistIndex();
+    return length > 0 && index >= length - 1;
+}
+
+function playNextWithWrap() {
+    const length = getPlaylistLength();
+    const index = getCurrentPlaylistIndex();
+
+    if (length > 0 && index >= length - 1) {
+        // Next from the final song wraps to the first song.
+        playPlaylistIndex(0);
+    } else {
+        player.nextVideo();
+    }
+}
+
+function playPreviousWithWrap() {
+    const length = getPlaylistLength();
+    const index = getCurrentPlaylistIndex();
+
+    if (length > 0 && index <= 0) {
+        // Previous from the first song wraps to the final song.
+        playPlaylistIndex(length - 1);
+    } else {
+        player.previousVideo();
+    }
 }
 
 function togglePlay() {
