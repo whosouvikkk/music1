@@ -123,7 +123,7 @@ function onPlayerStateChange(event) {
 }
 
 function onPlayerError(event) {
-    ui.trackTitle.innerText = "The highway is quiet right now.";
+    ui.trackTitle.innerText = "The night is still";
     ui.trackArtist.innerText = "Track unavailable or blocked.";
 }
 
