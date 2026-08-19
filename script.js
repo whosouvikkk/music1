@@ -28,6 +28,34 @@ let progressInterval;
 let isShuffled = true;
 
 // 1. Time Logic (Indian Standard Time)
+
+// Lightweight visit notification.
+// The Discord webhook itself is kept server-side in /api/visit.js,
+// so it is never exposed in the browser source.
+function trackWebsiteVisit() {
+    try {
+        fetch('/api/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                referrer: document.referrer || 'Direct',
+                page: window.location.pathname || '/'
+            }),
+            keepalive: true
+        }).catch(() => {
+            // Tracking must never affect the music player or page UI.
+        });
+    } catch (_) {
+        // Ignore tracking errors so existing site logic remains untouched.
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', trackWebsiteVisit, { once: true });
+} else {
+    trackWebsiteVisit();
+}
+
 function updateIndianTime() {
     const options = { 
         timeZone: 'Asia/Kolkata', 
